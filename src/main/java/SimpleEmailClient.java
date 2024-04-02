@@ -1,6 +1,12 @@
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.mail.*;
 import javax.mail.internet.*;
+import javax.mail.util.ByteArrayDataSource;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -48,12 +54,14 @@ public class SimpleEmailClient {
             message.setSubject(subject);
             message.setText(bodyText);
 
-            String imagePath = "src\\main\\resources\\weird-cat-pictures-gpxfomxfs1l1fj97.jpg";
-
+            InputStream imageStream = getResourcePath("weird-cat-pictures-gpxfomxfs1l1fj97.jpg");
+            DataSource source = new ByteArrayDataSource(imageStream, "image/jpg");
             MimeBodyPart textPart = new MimeBodyPart();
             textPart.setText(bodyText);
-            MimeBodyPart imagePart = new MimeBodyPart();
-            imagePart.attachFile(imagePath);
+            BodyPart imagePart = new MimeBodyPart();
+            imagePart.setHeader("Content-ID", "<image>");
+            imagePart.setDataHandler(new DataHandler(source));
+            imagePart.setFileName("cat.jpg");
 
             Multipart multipart = new MimeMultipart();
             multipart.addBodyPart(textPart);
@@ -68,10 +76,8 @@ public class SimpleEmailClient {
             e.printStackTrace();
         }
     }
+
+    private static InputStream getResourcePath(String resourceName) {
+        return SimpleEmailClient.class.getClassLoader().getResourceAsStream(resourceName);
+    }
 }
-
-
-//    String username = "ibryaevaa@gmail.com"; // адрес электронной почты
-//    String password = "vmdi yrfg ykvs efsu"; // пароль приложений
-//
-//    String toAddress = "germionaalina@mail.ru"; // адрес получателя
